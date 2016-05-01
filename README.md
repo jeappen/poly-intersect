@@ -1,5 +1,5 @@
-# Well Formed Polygons and Plygon Intersection
-# DSA Course Assignment #1
+# Well Formed Polygons and Polygon Intersection
+## DSA Course Assignment #1
 
 Given a bunch of polygons, determine if they are all well-formed, and if so, whether they form an
 interconnected region. Find the “shortest” path to each polygon from the initial polygon.
