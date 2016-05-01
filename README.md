@@ -18,12 +18,13 @@ starting from (x1,y1).
 *The maximum number of vertices is 20, i.e. each row will contain at most 40 non-negative integers.
 
 Example input file:
-
+```
 4
 0 0 10 10 20 10 10 0
 10 0 10 20 15 20 15 0
 20 0 20 10 30 20
 0 0 10 10 10 0 0 10
+```
 
 ##BAD polygons
 A polygon that is not well formed is called a bad polygon. This can happen, for example, if the format
@@ -41,8 +42,9 @@ If you encounter a bad polygon in the input file, print the single word BAD in t
 followed by a space followed by the number of the polygon.
 Example:
 For the input file that we used above, we should print in the output file:
+```
 BAD 4
-
+```
 ##Overlapping polygons
 If two polygons intersect with non-zero intersection area, then they are said to overlap.
 Note that if two polygons touch each other at a vertex or edge, then this does not mean that they overlap.
@@ -55,13 +57,16 @@ input, print in the output file the single word DISCONNECTED followed by a space
 of the first polygon that cannot be reached from the initial polygon.
 
 For example, if the input file is
+```
 3
 0 0 10 10 20 10 10 0
 10 0 10 20 15 20 15 0
 20 0 20 10 30 20
-
+```
 Then the output file should read:
+```
 DISCONNECTED 3
+```
 
 #Distance between polygons
 If polygon Pi overlaps with Pj, then a directed edge can be drawn from Pi to Pj carrying weight w given by:
@@ -80,14 +85,17 @@ CONNECTED and line number k should contain the distance to polygon k rounded to 
 that we omit the initial polygon, since the distance to it is known to be 0.
 
 If the input file is:
+```
 4
 0 0 0 20 20 20 20 0
 15 15 15 30 30 30 30 15
 15 0 15 5 30 5 30 0
 25 0 25 20 30 20 30 0
-
+```
 Then the output file will be:
+```
 CONNECTED
 17.68
 14.58
 23.59
+```
