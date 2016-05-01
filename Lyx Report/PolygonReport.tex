@@ -1,0 +1,188 @@
+%% LyX 2.1.4 created this file.  For more info, see http://www.lyx.org/.
+%% Do not edit unless you really know what you are doing.
+\documentclass[12pt,english]{article}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage[a4paper]{geometry}
+\geometry{verbose,tmargin=1.25cm,bmargin=1.25cm,lmargin=1.25cm,rmargin=1.25cm}
+\usepackage{babel}
+\usepackage[unicode=true]
+ {hyperref}
+
+\makeatletter
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% User specified LaTeX commands.
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+
+\makeatother
+
+\begin{document}
+
+\title{DSA Assignment 1:Well Formed Polygons}
+
+
+\author{Joe Kurian Eappen\\
+EE13B080}
+
+\maketitle
+
+\section{Introduction}
+
+Program was done in C++ with the use of the STL. Vectors were used
+to facilitate dynamically allocated structures ( such as number of
+sides in a Polygon, number of Polygons,etc.). This could have been
+done with preallocated memory spaces with the limiting cases in mind
+as well.
+
+
+\subsection{Data Structures And Special Variables Used}
+\begin{enumerate}
+\item Constants
+
+\begin{enumerate}
+\item Constants used in the Adjacency Matrix : \\
+const int NOT\_CHECKED=-2; const int NOT\_CONNECTED=-1; \\
+const int INTERSECTING=1; const int ITSELF=0;
+\item Defining the bounds of our coordinate space:\\
+const int END\_OF\_X=32000; const int END\_OF\_Y=32000;
+\item Maximum distance between any two polyons in the graph. Used in place
+of INF in the shortest path algo. \\
+const float MAX\_DIST=1000000;
+\end{enumerate}
+\item Structures:
+
+\begin{enumerate}
+\item Point: To store X and Y coordinates of a point where both are non
+negative integers.
+\item Side: Consisting of two Point Structures.
+
+\begin{enumerate}
+\item Preprocessing was done to store the left coordinate of a particular
+side in the first Point structure and the right coordinate in the
+second for all edges.
+\end{enumerate}
+\item CentroidPoint: To store the X and Y coordinates of the Centroid of
+a Polygon ( float used since it may have decimal values)
+\item edge: To store the 'to' node and length of the edge in the AdjacencyList
+representation.
+\end{enumerate}
+\item Classes
+
+\begin{enumerate}
+\item Polygon:
+
+\begin{enumerate}
+\item Members:
+
+\begin{enumerate}
+\item vectors x,y : to store the i-th coordinates in x{[}i{]} and y{[}i{]}.
+In hndsight, a vector of the Point struct would have been a better
+choice but this was implemented later.
+\item bool convexity : true if shape was convex, false if not (intended
+to implement faster algorithms for convex polygons but spent time
+on other aspects of the program)
+\item Vector of Side struct
+
+\begin{enumerate}
+\item sides : Sides in the same order as inputed
+\item sidesOrderedByX: Sides ordered in ascending order of the leftmost
+coordinate
+\end{enumerate}
+\item CentroidPoint cent : To store the centroid of the polygon
+\item int xmax,xmin,ymax,ymin: To store the values needed to construct the
+bounding rectangle of the Polygon. 
+\end{enumerate}
+\item Important Member Functions:
+
+\begin{enumerate}
+\item bool CheckIfAntiClockwise():
+
+\begin{enumerate}
+\item Checks if point given are in the anticlockwise order.
+\item Uses the fact that the integral of the area is negative if going in
+the anticlockwise direction.
+\end{enumerate}
+\item bool CheckConvexity():
+
+\begin{enumerate}
+\item Check if polygon is convex using the fact that any 3 points in order
+should have clockwise orientation if the polygon is convex.
+\end{enumerate}
+\item int orientation(Point p, Point q, Point r):
+
+\begin{enumerate}
+\item Returns 0,1 or 2 depending on if p,q, and r are collinear, anticlockwise
+or clockwise (in our unusual coordinate system where -y axis is +y.)
+\item Used the slopes of the line from Point p to q and q to r to make the
+decision.
+\item Algo provided \href{http://www.geeksforgeeks.org/orientation-3-ordered-points/}{here}.
+\end{enumerate}
+\item bool onSegment(Point p, Point q, Point r):
+
+\begin{enumerate}
+\item Returns true if Point q is on the line segment connecting p and r.
+\end{enumerate}
+\item bool doIntersect(Point p1, Point q1, Point p2, Point q2, bool DoingPointInPolyCheck=false):
+
+\begin{enumerate}
+\item if DoingPointInPolyCheck=false then Check if line p1q1 and p2q2 are
+intersecting excluding the case that one point lies on the other line
+(or is collinear)
+\item else consider that case as well.
+\item This was needed to include the condition that touching edges or a
+vertice on an edge was not considered to be intersecting ( which was
+a major reason for most hiccups in the code and a significant part
+of the problem statement.)
+\end{enumerate}
+\item bool CheckIfIntersecting():
+
+\begin{enumerate}
+\item To check if any of the edges of the polygon intersects with the other.
+\item This was made before the idea of using an Edge structure or a vector
+of such structures came to mind and iterates through all points constructing
+edges as we move along.
+\end{enumerate}
+\item bool CheckPointInPolygon(Point p):
+
+\begin{enumerate}
+\item Checks if a given pont P is inside the polygon or not (includes edges).
+\item First checks if Point is outside the bounding rectange of the polygon.
+\item If it is inside, counts number of intersections of a line y=(x coordinate
+of P). If this is even then the point is outside, else it is inside.
+\item If collinear then check if point lies on the collinear edge else don't
+count it.
+\end{enumerate}
+\item bool CheckPointStrictlyInPolygon(Point p):
+
+\begin{enumerate}
+\item Checks if a given pont P is strictly inside the polygon or not.
+\end{enumerate}
+\item Constructor function taking vector<int> x,vector<int> y:
+
+\begin{enumerate}
+\item Calculated bounding rectangle, centroid, convexity and populates sides
+and sidesOrderedByX.
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\item SetOfPolygons:
+
+\begin{enumerate}
+\item Members:
+
+\begin{enumerate}
+\item vector<Polygon> PolyList : a vector of the Polygons in the program
+\item vector<float> distances: The distances to each polygon from the first
+one (if graph is connected).
+\item vector< vector<int> > AdjacencyMatrix: Matrix used to check for intersections.
+-2 for not checked, -1 for infinity, 1 for Intersecting (see constants).
+\item vector< vector<edge> > AdjacencyList : Adjacency List representation
+of th graph used in the shortest path algorithm.
+\item int DisconnectedPoly, bool Disconnected :\\
+In case the graph is disconnected, store the position of the disconnected
+polygon.\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+\end{enumerate}
+
+\end{document}

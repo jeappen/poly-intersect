@@ -1,0 +1,683 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass article
+\begin_preamble
+\usepackage{tikz}
+\usetikzlibrary{arrows}
+\usepackage{subfig}
+\end_preamble
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 12
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry true
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.25cm
+\topmargin 1.25cm
+\rightmargin 1.25cm
+\bottommargin 1.25cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+DSA Assignment 1:Well Formed Polygons
+\end_layout
+
+\begin_layout Author
+Joe Kurian Eappen
+\begin_inset Newline newline
+\end_inset
+
+EE13B080
+\end_layout
+
+\begin_layout Section
+Introduction
+\end_layout
+
+\begin_layout Standard
+Program was done in C++ with the use of the STL.
+ Vectors were used to facilitate dynamically allocated structures ( such
+ as number of sides in a Polygon, number of Polygons,etc.).
+ This could have been done with preallocated memory spaces with the limiting
+ cases in mind as well.
+\end_layout
+
+\begin_layout Subsection
+Data Structures And Special Variables Used
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Subsubsection
+Constants
+\end_layout
+
+\begin_layout Enumerate
+Constants used in the Adjacency Matrix : 
+\begin_inset Newline newline
+\end_inset
+
+const int NOT_CHECKED=-2; const int NOT_CONNECTED=-1; 
+\begin_inset Newline newline
+\end_inset
+
+const int INTERSECTING=1; const int ITSELF=0;
+\end_layout
+
+\begin_layout Enumerate
+Defining the bounds of our coordinate space:
+\begin_inset Newline newline
+\end_inset
+
+const int END_OF_X=32000; const int END_OF_Y=32000;
+\end_layout
+
+\begin_layout Enumerate
+Maximum distance between any two polyons in the graph.
+ Used in place of INF in the shortest path algo.
+ 
+\begin_inset Newline newline
+\end_inset
+
+const float MAX_DIST=1000000;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Structures:
+\end_layout
+
+\begin_layout Enumerate
+Point: To store X and Y coordinates of a point where both are non negative
+ integers.
+\end_layout
+
+\begin_layout Enumerate
+Side: Consisting of two Point Structures.
+ Preprocessing was done to store the left coordinate of a particular side
+ in the first Point structure and the right coordinate in the second for
+ all edges.
+\end_layout
+
+\begin_layout Enumerate
+CentroidPoint: To store the X and Y coordinates of the Centroid of a Polygon
+ ( float used since it may have decimal values)
+\end_layout
+
+\begin_layout Enumerate
+edge: To store the 'to' node and length of the edge in the AdjacencyList
+ representation.
+\end_layout
+
+\begin_layout Subsubsection
+Classes
+\end_layout
+
+\begin_layout Enumerate
+Polygon:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Important Members:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+vectors x,y : to store the i-th coordinates in x[i] and y[i].
+ In hndsight, a vector of the Point struct would have been a better choice
+ but this was implemented later.
+\end_layout
+
+\end_inset
+
+bool convexity : true if shape was convex, false if not (intended to implement
+ faster algorithms for convex polygons but spent time on other aspects of
+ the program)
+\end_layout
+
+\begin_layout Enumerate
+Vector of Side struct
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+sides : Sides in the same order as inputed
+\end_layout
+
+\begin_layout Enumerate
+sidesOrderedByX: Sides ordered in ascending order of the leftmost coordinate
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+CentroidPoint cent : To store the centroid of the polygon
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+int xmax,xmin,ymax,ymin: To store the values needed to construct the bounding
+ rectangle of the Polygon.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Important Member Functions:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+bool CheckIfAntiClockwise():
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Checks if point given are in the anticlockwise order.
+\end_layout
+
+\begin_layout Enumerate
+Uses the fact that the integral of the area is negative if going in the
+ anticlockwise direction.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+bool CheckConvexity(): Check if polygon is convex using the fact that any
+ 3 points in order should have clockwise orientation if the polygon is convex.
+\end_layout
+
+\begin_layout Enumerate
+int orientation(Point p, Point q, Point r):
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Returns 0,1 or 2 depending on if p,q, and r are collinear, anticlockwise
+ or clockwise (in our unusual coordinate system where -y axis is +y.)
+\end_layout
+
+\begin_layout Enumerate
+Used the slopes of the line from Point p to q and q to r to make the decision.
+\end_layout
+
+\begin_layout Enumerate
+Algo provided 
+\begin_inset CommandInset href
+LatexCommand href
+name "here"
+target "http://www.geeksforgeeks.org/orientation-3-ordered-points/"
+
+\end_inset
+
+.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+bool onSegment(Point p, Point q, Point r): Returns true if Point q is on
+ the line segment connecting p and r.
+\end_layout
+
+\begin_layout Enumerate
+bool doIntersect(Point p1, Point q1, Point p2, Point q2, bool DoingPointInPolyCh
+eck=false):
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+if DoingPointInPolyCheck=false then Check if line p1q1 and p2q2 are intersecting
+ excluding the case that one point lies on the other line (or is collinear)
+\end_layout
+
+\begin_layout Enumerate
+else consider that case as well.
+\end_layout
+
+\begin_layout Enumerate
+This was needed to include the condition that touching edges or a vertice
+ on an edge was not considered to be intersecting ( which was a major reason
+ for most hiccups in the code and a significant part of the problem statement.)
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+bool CheckIfIntersecting():
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+To check if any of the edges of the polygon intersects with the other.
+\end_layout
+
+\begin_layout Enumerate
+This was made before the idea of using an Edge structure or a vector of
+ such structures came to mind and iterates through all points constructing
+ edges as we move along.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+bool CheckPointInPolygon(Point p):
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Checks if a given pont P is inside the polygon or not (includes edges).
+\end_layout
+
+\begin_layout Enumerate
+First checks if Point is outside the bounding rectange of the polygon.
+\end_layout
+
+\begin_layout Enumerate
+If it is inside, counts number of intersections of a line y=(x coordinate
+ of P).
+ If this is even then the point is outside, else it is inside.
+\end_layout
+
+\begin_layout Enumerate
+If collinear then check if point lies on the collinear edge else don't count
+ it.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+bool CheckPointStrictlyInPolygon(Point p): Checks if a given pont P is strictly
+ inside the polygon or not.
+\end_layout
+
+\begin_layout Enumerate
+Constructor function taking vector<int> x,vector<int> y: Calculates bounding
+ rectangle, centroid, convexity and populates sides and sidesOrderedByX.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Enumerate
+SetOfPolygons:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Important Members:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+vector<Polygon> PolyList : a vector of the Polygons in the program
+\end_layout
+
+\begin_layout Enumerate
+vector<float> distances: The distances to each polygon from the first one
+ (if graph is connected).
+\end_layout
+
+\begin_layout Enumerate
+vector< vector<int> > AdjacencyMatrix: Matrix used to check for intersections.
+ -2 for not checked, -1 for infinity, 1 for Intersecting (see constants).
+\end_layout
+
+\begin_layout Enumerate
+vector< vector<edge> > AdjacencyList : Adjacency List representation of
+ th graph used in the shortest path algorithm.
+\end_layout
+
+\begin_layout Enumerate
+int DisconnectedPoly, bool Disconnected :
+\begin_inset Newline newline
+\end_inset
+
+In case the graph is disconnected, store the position of the disconnected
+ polygon.
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+Important Member Functions:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+void PopulateAdjMatrix():
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+Makes our version of an Adjacency Matrix going row by row.
+\end_layout
+
+\begin_layout Enumerate
+Checks if bounding rectangles are intersecting first, if not, mark as non
+ intersecting else next run CheckPolyIntersect()
+\end_layout
+
+\begin_layout Enumerate
+If PolyIntersect returns true, add to adjacency list with edge length as
+ proposed distance.
+\end_layout
+
+\begin_layout Enumerate
+Else mark as non-intersecting
+\end_layout
+
+\begin_layout Enumerate
+Uses fact that Adjacency Matrix is symmetric (repeated calculations are
+ skipped)
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+void SetDistances(): Run Dijkstra's algo on the AdjList.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Section
+Polygon Intersection Algorithm
+\begin_inset Newline newline
+\end_inset
+
+bool CheckPolyIntersect(Polygon poly1,Polygon poly2):
+\end_layout
+
+\begin_layout Enumerate
+Iterates side by side from the using the preprocessed SidesOrderedByX vector
+ and is based on the line sweep algorithm done at the vecrtices.
+\end_layout
+
+\begin_layout Enumerate
+Chooses the side further to the left out of both polygons and adds to the
+ active set.
+\end_layout
+
+\begin_layout Enumerate
+Check if side added to the active set intersects with any of the sides in
+ the active set.
+\end_layout
+
+\begin_layout Enumerate
+Checks if the side has the right end point of any of the sides in the active
+ set (which is true for all sides other than the first two) and removes
+ them if so.
+\end_layout
+
+\begin_layout Enumerate
+Break if inserted side's left point is beyond xmax of the other polygon.
+\end_layout
+
+\begin_layout Enumerate
+This skips the case where the polygon is wholly contained in the other so
+ need to check if at least one point is inside the other polygon to catch
+ this.
+ This is where we use CheckIfPointInPolygon().
+\end_layout
+
+\begin_layout Enumerate
+If all the vertices of one lie on the edges of the other polygon then the
+ sides are not considered intersecting and this is a problem.
+\end_layout
+
+\begin_layout Enumerate
+Returns true if the polygons are completely identical (side vectors are
+ equal).
+\end_layout
+
+\begin_layout Enumerate
+Now need to check cases where the polygon sides or vertices are touching
+ as well the polygons intersect with non zero area.
+\end_layout
+
+\begin_layout Section
+Problematic Testcases
+\end_layout
+
+\begin_layout Standard
+Using the iteration along sides was yielding problems when the sides or
+ vertices are touching the other polygons sides, without the sides intersecting
+ (in our problem, touching was not considered intersecting) and having nonzero
+ intersection area.
+\end_layout
+
+\begin_layout Standard
+Examples are:
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{center}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{figure}[h]
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{center}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+begin{tabular}{cc}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+subfloat[Triangle and Square]{
+\backslash
+includegraphics[width = 2in]{../../../../Desktop/test}} &
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+subfloat[Two Squares]{
+\backslash
+includegraphics[width = 2in]{../../../../Desktop/test2}} 
+\backslash
+
+\backslash
+
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+subfloat[Two Squares]{
+\backslash
+includegraphics[width = 2in]{../../../../Desktop/test4}}&
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+subfloat[Two Squares]{
+\backslash
+includegraphics[width = 2in]{../../../../Desktop/test3}}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{tabular}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+caption{Four Problematic Testcases} 
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{center}
+\backslash
+end{figure}
+\end_layout
+
+\begin_layout Plain Layout
+
+
+\backslash
+end{center}
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+One possible way is to check if some randomised point along the line lies
+ in the other polygon or if maybe the centroid lies in the other polygon
+ given that all the points lie on the edge.
+ The submitted code tried to check if the midpoint of any of the sides lie
+ in the polygon but was largely imperfect since the midpoint was not considered
+ to have decimal coordinates (since most of the functions would have to
+ be overwritten to work with floats, or templates could have been used to
+ enable this functionality) .
+ This midpoint test would fail if the midpoints of the edges lie on the
+ boundary of the polygons.
+ A better way of strictly lying inside and touching the edge should have
+ been implemented.
+\end_layout
+
+\begin_layout Standard
+One method would have been to run the linesweep algorithm over all integers
+ in the space (pass a line x=i for all i and check for order of sides intersecti
+ng) but this would have failed in cases such as the second one with the
+ intersecting area being 1 unit wide.
+ Need to make special conditions for edge touching cases here too.
+\end_layout
+
+\begin_layout Section
+Analysis of Time Complexity
+\end_layout
+
+\begin_layout Standard
+For each check of two polygons intersecting the worst case is when you go
+ through all sides.
+ - O(M+N)
+\begin_inset Newline newline
+\end_inset
+
+For a particular side, worst case of checking for intersection is when it
+ intersects all the other polygons sides O(M+N).
+\end_layout
+
+\begin_layout Standard
+So this is O(P(N)^2).
+\begin_inset Newline newline
+\end_inset
+
+Where p is number of polygons and n is number of vertices.
+\begin_inset Newline newline
+\end_inset
+
+This can be significantly improved using a O(nlogn) algo to check for polygon
+ intersection or the O(M+N) algo for the convex polygons and the normal
+ algo for the concave polygons and intersection between convex and concave
+ polygons.
+\end_layout
+
+\end_body
+\end_document
